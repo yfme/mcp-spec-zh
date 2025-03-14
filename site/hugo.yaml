@@ -23,7 +23,7 @@ params:
     logo:
       path: images/light.svg
       dark: images/dark.svg
-      link: /latest
+      link: latest
       width: 204
       height: 30
   protocolRevision: "2024-11-05"

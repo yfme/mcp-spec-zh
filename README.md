@@ -1,17 +1,13 @@
-# Model Context Protocol specification
+# 模型上下文协议规范
 
-This repo contains the specification and protocol schema for the Model Context Protocol.
+本仓库包含模型上下文协议的规范和协议模式。
 
-The schema is [defined in TypeScript](schema/2024-11-05/schema.ts) first, but
-[made available as JSON Schema](schema/2024-11-05/schema.json) as well, for wider
-compatibility.
+该模式首先[使用 TypeScript 定义](schema/2024-11-05/schema.ts)，但也[提供 JSON Schema 版本](schema/2024-11-05/schema.json)，以实现更广泛的兼容性。
 
-## Contributing
+## 贡献
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this
-project.
+有关如何为此项目做出贡献的详细信息，请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-## License
+## 许可证
 
-This project is licensed under the MIT License—see the [LICENSE](LICENSE) file for
-details.
+本项目采用 MIT 许可证授权——详情请参阅 [LICENSE](LICENSE) 文件。

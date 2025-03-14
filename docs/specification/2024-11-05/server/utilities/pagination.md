@@ -1,31 +1,27 @@
 ---
-title: Pagination
+title: 分页
 ---
 
-{{< callout type="info" >}} **Protocol Revision**: {{< param protocolRevision >}}
+{{< callout type="info" >}} **协议版本**：{{< param protocolRevision >}}
 {{< /callout >}}
 
-The Model Context Protocol (MCP) supports paginating list operations that may return
-large result sets. Pagination allows servers to yield results in smaller chunks rather
-than all at once.
+模型上下文协议（MCP）支持对可能返回大型结果集的列表操作进行分页。分页允许服务器以较小的块而不是一次性返回结果。
 
-Pagination is especially important when connecting to external services over the
-internet, but also useful for local integrations to avoid performance issues with large
-data sets.
+分页在通过互联网连接到外部服务时尤为重要，但对于本地集成也很有用，可以避免大型数据集的性能问题。
 
-## Pagination Model
+## 分页模型
 
-Pagination in MCP uses an opaque cursor-based approach, instead of numbered pages.
+MCP 中的分页使用不透明的基于游标的方法，而不是编号页面。
 
-- The **cursor** is an opaque string token, representing a position in the result set
-- **Page size** is determined by the server, and **MAY NOT** be fixed
+- **游标**是一个不透明的字符串令牌，表示结果集中的位置
+- **页面大小**由服务器确定，**可能不**是固定的
 
-## Response Format
+## 响应格式
 
-Pagination starts when the server sends a **response** that includes:
+当服务器发送包含以下内容的**响应**时，分页开始：
 
-- The current page of results
-- An optional `nextCursor` field if more results exist
+- 当前结果页面
+- 如果存在更多结果，则包含可选的 `nextCursor` 字段
 
 ```json
 {
@@ -38,10 +34,9 @@ Pagination starts when the server sends a **response** that includes:
 }
 ```
 
-## Request Format
+## 请求格式
 
-After receiving a cursor, the client can _continue_ paginating by issuing a request
-including that cursor:
+收到游标后，客户端可以通过发出包含该游标的请求来_继续_分页：
 
 ```json
 {
@@ -53,46 +48,46 @@ including that cursor:
 }
 ```
 
-## Pagination Flow
+## 分页流程
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Server
 
-    Client->>Server: List Request (no cursor)
-    loop Pagination Loop
-      Server-->>Client: Page of results + nextCursor
-      Client->>Server: List Request (with cursor)
+    Client->>Server: 列表请求（无游标）
+    loop 分页循环
+      Server-->>Client: 结果页面 + nextCursor
+      Client->>Server: 列表请求（带游标）
     end
 ```
 
-## Operations Supporting Pagination
+## 支持分页的操作
 
-The following MCP operations support pagination:
+以下 MCP 操作支持分页：
 
-- `resources/list` - List available resources
-- `resources/templates/list` - List resource templates
-- `prompts/list` - List available prompts
-- `tools/list` - List available tools
+- `resources/list` - 列出可用资源
+- `resources/templates/list` - 列出资源模板
+- `prompts/list` - 列出可用提示
+- `tools/list` - 列出可用工具
 
-## Implementation Guidelines
+## 实现指南
 
-1. Servers **SHOULD**:
+1. 服务器**应该**：
 
-   - Provide stable cursors
-   - Handle invalid cursors gracefully
+   - 提供稳定的游标
+   - 优雅地处理无效游标
 
-2. Clients **SHOULD**:
+2. 客户端**应该**：
 
-   - Treat a missing `nextCursor` as the end of results
-   - Support both paginated and non-paginated flows
+   - 将缺少的 `nextCursor` 视为结果结束
+   - 支持分页和非分页流
 
-3. Clients **MUST** treat cursors as opaque tokens:
-   - Don't make assumptions about cursor format
-   - Don't attempt to parse or modify cursors
-   - Don't persist cursors across sessions
+3. 客户端**必须**将游标视为不透明令牌：
+   - 不要对游标格式做假设
+   - 不要尝试解析或修改游标
+   - 不要在会话之间持久化游标
 
-## Error Handling
+## 错误处理
 
-Invalid cursors **SHOULD** result in an error with code -32602 (Invalid params).
+无效的游标**应该**导致代码为 -32602（无效参数）的错误。

@@ -3,19 +3,17 @@ title: Ping
 weight: 5
 ---
 
-{{< callout type="info" >}} **Protocol Revision**: draft {{< /callout >}}
+{{< callout type="info" >}} **协议版本**：草案 {{< /callout >}}
 
-The Model Context Protocol includes an optional ping mechanism that allows either party
-to verify that their counterpart is still responsive and the connection is alive.
+模型上下文协议包括一个可选的 ping 机制，允许任何一方验证其对应方仍然有响应且连接处于活动状态。
 
-## Overview
+## 概述
 
-The ping functionality is implemented through a simple request/response pattern. Either
-the client or server can initiate a ping by sending a `ping` request.
+ping 功能通过简单的请求/响应模式实现。客户端或服务器都可以通过发送 `ping` 请求来启动 ping。
 
-## Message Format
+## 消息格式
 
-A ping request is a standard JSON-RPC request with no parameters:
+ping 请求是一个没有参数的标准 JSON-RPC 请求：
 
 ```json
 {
@@ -25,9 +23,9 @@ A ping request is a standard JSON-RPC request with no parameters:
 }
 ```
 
-## Behavior Requirements
+## 行为要求
 
-1. The receiver **MUST** respond promptly with an empty response:
+1. 接收者**必须**及时响应一个空响应：
 
 ```json
 {
@@ -37,31 +35,31 @@ A ping request is a standard JSON-RPC request with no parameters:
 }
 ```
 
-2. If no response is received within a reasonable timeout period, the sender **MAY**:
-   - Consider the connection stale
-   - Terminate the connection
-   - Attempt reconnection procedures
+2. 如果在合理的超时期内没有收到响应，发送者**可以**：
+   - 认为连接已过期
+   - 终止连接
+   - 尝试重新连接程序
 
-## Usage Patterns
+## 使用模式
 
 ```mermaid
 sequenceDiagram
     participant Sender
     participant Receiver
 
-    Sender->>Receiver: ping request
-    Receiver->>Sender: empty response
+    Sender->>Receiver: ping 请求
+    Receiver->>Sender: 空响应
 ```
 
-## Implementation Considerations
+## 实现考虑
 
-- Implementations **SHOULD** periodically issue pings to detect connection health
-- The frequency of pings **SHOULD** be configurable
-- Timeouts **SHOULD** be appropriate for the network environment
-- Excessive pinging **SHOULD** be avoided to reduce network overhead
+- 实现**应该**定期发出 ping 以检测连接健康状况
+- ping 的频率**应该**是可配置的
+- 超时**应该**适合网络环境
+- **应该**避免过度 ping 以减少网络开销
 
-## Error Handling
+## 错误处理
 
-- Timeouts **SHOULD** be treated as connection failures
-- Multiple failed pings **MAY** trigger connection reset
-- Implementations **SHOULD** log ping failures for diagnostics
+- 超时**应该**被视为连接失败
+- 多次 ping 失败**可能**触发连接重置
+- 实现**应该**记录 ping 失败以进行诊断

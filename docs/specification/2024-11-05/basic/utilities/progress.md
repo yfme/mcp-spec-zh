@@ -1,23 +1,19 @@
 ---
-title: Progress
+title: 进度
 weight: 30
 ---
 
-{{< callout type="info" >}} **Protocol Revision**: {{< param protocolRevision >}}
+{{< callout type="info" >}} **协议版本**：{{< param protocolRevision >}}
 {{< /callout >}}
 
-The Model Context Protocol (MCP) supports optional progress tracking for long-running
-operations through notification messages. Either side can send progress notifications to
-provide updates about operation status.
+模型上下文协议（MCP）通过通知消息支持对长时间运行的操作进行可选的进度跟踪。任何一方都可以发送进度通知，提供关于操作状态的更新。
 
-## Progress Flow
+## 进度流程
 
-When a party wants to _receive_ progress updates for a request, it includes a
-`progressToken` in the request metadata.
+当一方想要_接收_请求的进度更新时，它在请求元数据中包含一个 `progressToken`。
 
-- Progress tokens **MUST** be a string or integer value
-- Progress tokens can be chosen by the sender using any means, but **MUST** be unique
-  across all active requests.
+- 进度令牌**必须**是字符串或整数值
+- 进度令牌可以由发送者使用任何方式选择，但**必须**在所有活动请求中唯一。
 
 ```json
 {
@@ -32,11 +28,11 @@ When a party wants to _receive_ progress updates for a request, it includes a
 }
 ```
 
-The receiver **MAY** then send progress notifications containing:
+接收者**可以**然后发送包含以下内容的进度通知：
 
-- The original progress token
-- The current progress value so far
-- An optional "total" value
+- 原始进度令牌
+- 目前为止的当前进度值
+- 可选的"总计"值
 
 ```json
 {
@@ -50,43 +46,42 @@ The receiver **MAY** then send progress notifications containing:
 }
 ```
 
-- The `progress` value **MUST** increase with each notification, even if the total is
-  unknown.
-- The `progress` and the `total` values **MAY** be floating point.
+- `progress` 值**必须**随着每个通知增加，即使总计未知。
+- `progress` 和 `total` 值**可以**是浮点数。
 
-## Behavior Requirements
+## 行为要求
 
-1. Progress notifications **MUST** only reference tokens that:
+1. 进度通知**必须**只引用以下令牌：
 
-   - Were provided in an active request
-   - Are associated with an in-progress operation
+   - 在活动请求中提供的
+   - 与正在进行的操作相关联的
 
-2. Receivers of progress requests **MAY**:
-   - Choose not to send any progress notifications
-   - Send notifications at whatever frequency they deem appropriate
-   - Omit the total value if unknown
+2. 进度请求的接收者**可以**：
+   - 选择不发送任何进度通知
+   - 以他们认为适当的频率发送通知
+   - 如果未知则省略总计值
 
 ```mermaid
 sequenceDiagram
     participant Sender
     participant Receiver
 
-    Note over Sender,Receiver: Request with progress token
-    Sender->>Receiver: Method request with progressToken
+    Note over Sender,Receiver: 带有进度令牌的请求
+    Sender->>Receiver: 带有 progressToken 的方法请求
 
-    Note over Sender,Receiver: Progress updates
-    loop Progress Updates
-        Receiver-->>Sender: Progress notification (0.2/1.0)
-        Receiver-->>Sender: Progress notification (0.6/1.0)
-        Receiver-->>Sender: Progress notification (1.0/1.0)
+    Note over Sender,Receiver: 进度更新
+    loop 进度更新
+        Receiver-->>Sender: 进度通知 (0.2/1.0)
+        Receiver-->>Sender: 进度通知 (0.6/1.0)
+        Receiver-->>Sender: 进度通知 (1.0/1.0)
     end
 
-    Note over Sender,Receiver: Operation complete
-    Receiver->>Sender: Method response
+    Note over Sender,Receiver: 操作完成
+    Receiver->>Sender: 方法响应
 ```
 
-## Implementation Notes
+## 实现说明
 
-- Senders and receivers **SHOULD** track active progress tokens
-- Both parties **SHOULD** implement rate limiting to prevent flooding
-- Progress notifications **MUST** stop after completion
+- 发送者和接收者**应该**跟踪活动的进度令牌
+- 双方**应该**实现速率限制以防止泛滥
+- 完成后**必须**停止进度通知

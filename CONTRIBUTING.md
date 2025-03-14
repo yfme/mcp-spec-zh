@@ -1,82 +1,78 @@
-# Contributing to Model Context Protocol
+# 为模型上下文协议做贡献
 
-Thank you for your interest in contributing to the Model Context Protocol specification!
-This document outlines how to contribute to this project.
+感谢您有兴趣为模型上下文协议规范做出贡献！本文档概述了如何为此项目做贡献。
 
-## Prerequisites
+## 先决条件
 
-The following software is required to work on the spec:
+开发规范需要以下软件：
 
-- Node.js 20 or above
+- Node.js 20 或更高版本
 - TypeScript
-- TypeScript JSON Schema (for generating JSON schema)
-- [Hugo](https://gohugo.io/) (optional, for docs)
-- Go (optional, for docs)
-- nvm (optional, for managing Node versions)
+- TypeScript JSON Schema（用于生成 JSON schema）
+- [Hugo](https://gohugo.io/)（可选，用于文档）
+- Go（可选，用于文档）
+- nvm（可选，用于管理 Node 版本）
 
-## Getting Started
+## 入门指南
 
-1. Fork the repository
-2. Clone your fork:
+1. Fork 本仓库
+2. 克隆您的 fork：
 
 ```bash
 git clone https://github.com/YOUR-USERNAME/specification.git
 cd specification
 ```
 
-3. Install dependencies:
+3. 安装依赖：
 
 ```bash
-nvm install  # install correct Node version
-npm install  # install dependencies
+nvm install  # 安装正确的 Node 版本
+npm install  # 安装依赖
 ```
 
-## Making Changes
+## 做出更改
 
-Note that schema changes are made to `schema.ts`. `schema.json` is generated from
-`schema.ts` using `npm run validate:schema`.
+请注意，模式更改应在 `schema.ts` 中进行。`schema.json` 是使用 `npm run validate:schema` 从 `schema.ts` 生成的。
 
-1. Create a new branch:
+1. 创建新分支：
 
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
-2. Make your changes
-3. Validate your changes:
+2. 进行更改
+3. 验证您的更改：
 
 ```bash
-npm run validate:schema    # validate schema
-npm run generate:json     # generate JSON schema
+npm run validate:schema    # 验证模式
+npm run generate:json     # 生成 JSON schema
 ```
 
-4. Run docs locally (optional):
+4. 在本地运行文档（可选）：
 
 ```bash
 npm run serve:docs
 ```
 
-## Submitting Changes
+## 提交更改
 
-1. Push your changes to your fork
-2. Submit a pull request to the main repository
-3. Follow the pull request template
-4. Wait for review
+1. 将更改推送到您的 fork
+2. 向主仓库提交拉取请求
+3. 遵循拉取请求模板
+4. 等待审核
 
-## Code of Conduct
+## 行为准则
 
-This project follows a Code of Conduct. Please review it in
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+本项目遵循行为准则。请在 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) 中查看。
 
-## Questions
+## 问题咨询
 
-If you have questions, please create an issue in the repository.
+如有疑问，请在仓库中创建一个 issue。
 
-## License
+## 许可证
 
-By contributing, you agree that your contributions will be licensed under the MIT
-License.
+通过贡献，您同意您的贡献将在 MIT 许可证下授权。
 
-## Security
+## 安全
 
-Please review our [Security Policy](SECURITY.md) for reporting security issues.
+请查看我们的[安全政策](SECURITY.md)以报告安全问题。

@@ -1,17 +1,13 @@
 ---
-title: "Contributions"
+title: "贡献"
 weight: 10
 cascade:
   type: docs
 breadcrumbs: false
 ---
 
-We welcome contributions from the community! Please review our
-[contributing guidelines](https://github.com/modelcontextprotocol/specification/blob/main/CONTRIBUTING.md)
-for details on how to submit changes.
+我们欢迎社区的贡献！请查看我们的[贡献指南](https://github.com/modelcontextprotocol/specification/blob/main/CONTRIBUTING.md)了解如何提交更改的详细信息。
 
-All contributors must adhere to our
-[Code of Conduct](https://github.com/modelcontextprotocol/specification/blob/main/CODE_OF_CONDUCT.md).
+所有贡献者必须遵守我们的[行为准则](https://github.com/modelcontextprotocol/specification/blob/main/CODE_OF_CONDUCT.md)。
 
-For questions and discussions, please use
-[GitHub Discussions](https://github.com/modelcontextprotocol/specification/discussions).
+如有问题和讨论，请使用 [GitHub 讨论](https://github.com/modelcontextprotocol/specification/discussions)。

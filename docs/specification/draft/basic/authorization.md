@@ -1,261 +1,218 @@
 ---
-title: Authorization
+title: 授权
 type: docs
 weight: 15
 ---
 
-{{< callout type="info" >}} **Protocol Revision**: draft {{< /callout >}}
+{{< callout type="info" >}} **协议版本**：草案 {{< /callout >}}
 
-## 1. Introduction
+## 1. 介绍
 
-### 1.1 Purpose and Scope
+### 1.1 目的和范围
 
-The Model Context Protocol provides authorization capabilities at the transport level,
-enabling MCP clients to make requests to restricted MCP servers on behalf of resource
-owners. This specification defines the authorization flow for HTTP+SSE transport.
+模型上下文协议在传输层提供授权功能，使 MCP 客户端能够代表资源所有者向受限的 MCP 服务器发出请求。本规范定义了 HTTP+SSE 传输的授权流程。
 
-### 1.2 Protocol Requirements
+### 1.2 协议要求
 
-Authorization is **OPTIONAL** for MCP implementations. When supported:
+授权对 MCP 实现来说是**可选的**。当支持时：
 
-- Implementations using an HTTP+SSE transport **SHOULD** conform to this specification.
-- Implementations using an STDIO transport **SHOULD NOT** follow this specification, and
-  instead retrieve credentials from the environment.
-- Implementations using alternative transports **MUST** follow established security best
-  practices for their protocol.
+- 使用 HTTP+SSE 传输的实现**应该**符合本规范。
+- 使用 STDIO 传输的实现**不应该**遵循本规范，而应该从环境中获取凭据。
+- 使用替代传输的实现**必须**遵循其协议的既定安全最佳实践。
 
-### 1.3 Standards Compliance
+### 1.3 标准合规性
 
-This authorization mechanism is based on established specifications listed below, but
-implements a selected subset of their features to ensure security and interoperability
-while maintaining simplicity:
+此授权机制基于下列既定规范，但实现了它们的特定子集，以确保安全性和互操作性，同时保持简单性：
 
-- [OAuth 2.1 IETF DRAFT](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12)
-- OAuth 2.0 Authorization Server Metadata
-  ([RFC8414](https://datatracker.ietf.org/doc/html/rfc8414))
-- OAuth 2.0 Dynamic Client Registration Protocol
-  ([RFC7591](https://datatracker.ietf.org/doc/html/rfc7591))
+- [OAuth 2.1 IETF 草案](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12)
+- OAuth 2.0 授权服务器元数据 ([RFC8414](https://datatracker.ietf.org/doc/html/rfc8414))
+- OAuth 2.0 动态客户端注册协议 ([RFC7591](https://datatracker.ietf.org/doc/html/rfc7591))
 
-## 2. Authorization Flow
+## 2. 授权流程
 
-### 2.1 Overview
+### 2.1 概述
 
-1. MCP auth implementations **MUST** implement OAuth 2.1 with appropriate security
-   measures for both confidential and public clients.
+1. MCP 授权实现**必须**实现 OAuth 2.1，并为机密客户端和公共客户端提供适当的安全措施。
 
-2. MCP auth implementations **SHOULD** support the OAuth 2.0 Dynamic Client Registration
-   Protocol ([RFC7591](https://datatracker.ietf.org/doc/html/rfc7591)).
+2. MCP 授权实现**应该**支持 OAuth 2.0 动态客户端注册协议 ([RFC7591](https://datatracker.ietf.org/doc/html/rfc7591))。
 
-3. MCP servers **SHOULD** and MCP clients **MUST** implement OAuth 2.0 Authorization
-   Server Metadata ([RFC8414](https://datatracker.ietf.org/doc/html/rfc8414)). Servers
-   that do not support Authorization Server Metadata **MUST** follow the default URI
-   schema.
+3. MCP 服务器**应该**而 MCP 客户端**必须**实现 OAuth 2.0 授权服务器元数据 ([RFC8414](https://datatracker.ietf.org/doc/html/rfc8414))。不支持授权服务器元数据的服务器**必须**遵循默认 URI 模式。
 
-### 2.2 Basic OAuth 2.1 Authorization
+### 2.2 基本 OAuth 2.1 授权
 
-When authorization is required and not yet proven by the client, servers **MUST** respond
-with _HTTP 401 Unauthorized_.
+当需要授权且客户端尚未证明授权时，服务器**必须**响应 _HTTP 401 未授权_。
 
-Clients initiate the
-[OAuth 2.1 IETF DRAFT](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12)
-authorization flow after receiving the _HTTP 401 Unauthorized_.
+客户端在收到 _HTTP 401 未授权_ 后启动 [OAuth 2.1 IETF 草案](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12) 授权流程。
 
-The following demonstrates the basic OAuth 2.1 for public clients using PKCE.
+以下演示了使用 PKCE 的公共客户端的基本 OAuth 2.1。
 
 ```mermaid
 sequenceDiagram
-    participant B as User-Agent (Browser)
-    participant C as Client
-    participant M as MCP Server
+    participant B as 用户代理（浏览器）
+    participant C as 客户端
+    participant M as MCP 服务器
 
-    C->>M: MCP Request
-    M->>C: HTTP 401 Unauthorized
-    Note over C: Generate code_verifier and code_challenge
-    C->>B: Open browser with authorization URL + code_challenge
+    C->>M: MCP 请求
+    M->>C: HTTP 401 未授权
+    Note over C: 生成 code_verifier 和 code_challenge
+    C->>B: 使用授权 URL + code_challenge 打开浏览器
     B->>M: GET /authorize
-    Note over M: User logs in and authorizes
-    M->>B: Redirect to callback URL with auth code
-    B->>C: Callback with authorization code
-    C->>M: Token Request with code + code_verifier
-    M->>C: Access Token (+ Refresh Token)
-    C->>M: MCP Request with Access Token
-    Note over C,M: Begin standard MCP message exchange
+    Note over M: 用户登录并授权
+    M->>B: 重定向到回调 URL 并携带授权码
+    B->>C: 带授权码的回调
+    C->>M: 使用授权码 + code_verifier 的令牌请求
+    M->>C: 访问令牌（+ 刷新令牌）
+    C->>M: 带访问令牌的 MCP 请求
+    Note over C,M: 开始标准 MCP 消息交换
 ```
 
-### 2.3 Server Metadata Discovery
+### 2.3 服务器元数据发现
 
-For server capability discovery:
+对于服务器能力发现：
 
-- MCP clients _MUST_ follow the OAuth 2.0 Authorization Server Metadata protocol defined
-  in [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414).
-- MCP server _SHOULD_ follow the OAuth 2.0 Authorization Server Metadata protocol.
-- MCP servers that do not support the OAuth 2.0 Authorization Server Metadata protocol,
-  _MUST_ support fallback URLs.
+- MCP 客户端_必须_遵循 [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414) 中定义的 OAuth 2.0 授权服务器元数据协议。
+- MCP 服务器_应该_遵循 OAuth 2.0 授权服务器元数据协议。
+- 不支持 OAuth 2.0 授权服务器元数据协议的 MCP 服务器_必须_支持回退 URL。
 
-The discovery flow is illustrated below:
+发现流程如下图所示：
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant S as Server
+    participant C as 客户端
+    participant S as 服务器
 
     C->>S: GET /.well-known/oauth-authorization-server
-    alt Discovery Success
-        S->>C: 200 OK + Metadata Document
-        Note over C: Use endpoints from metadata
-    else Discovery Failed
-        S->>C: 404 Not Found
-        Note over C: Fall back to default endpoints
+    alt 发现成功
+        S->>C: 200 OK + 元数据文档
+        Note over C: 使用元数据中的端点
+    else 发现失败
+        S->>C: 404 未找到
+        Note over C: 回退到默认端点
     end
-    Note over C: Continue with authorization flow
+    Note over C: 继续授权流程
 ```
 
-#### 2.3.1 Server Metadata Discovery Headers
+#### 2.3.1 服务器元数据发现头部
 
-MCP clients _SHOULD_ include the header `MCP-Protocol-Version: <protocol-version>` during
-Server Metadata Discovery to allow the MCP server to respond based on the MCP protocol
-version.
+MCP 客户端_应该_在服务器元数据发现期间包含头部 `MCP-Protocol-Version: <protocol-version>`，以允许 MCP 服务器根据 MCP 协议版本进行响应。
 
-For example: `MCP-Protocol-Version: 2024-11-05`
+例如：`MCP-Protocol-Version: 2024-11-05`
 
-#### 2.3.2 Authorization Base URL
+#### 2.3.2 授权基础 URL
 
-The authorization base URL **MUST** be determined from the [SSE
-endpoint]({{< ref "specification/draft/basic/transports#http-with-sse" >}}) URL by
-discarding any existing `path` component. For example:
+授权基础 URL **必须**通过丢弃任何现有的 `path` 组件从 [SSE 端点]({{< ref "specification/draft/basic/transports#http-with-sse" >}}) URL 确定。例如：
 
-If the SSE endpoint is `https://api.example.com/v1/sse`, then:
+如果 SSE 端点是 `https://api.example.com/v1/sse`，那么：
 
-- The authorization base URL is `https://api.example.com`
-- The metadata endpoint **MUST** be at
-  `https://api.example.com/.well-known/oauth-authorization-server`
+- 授权基础 URL 是 `https://api.example.com`
+- 元数据端点**必须**位于 `https://api.example.com/.well-known/oauth-authorization-server`
 
-This ensures authorization endpoints are consistently located at the root level of the
-domain serving the SSE endpoint, regardless of any path components in the SSE endpoint
-URL.
+这确保了授权端点始终位于提供 SSE 端点的域的根级别，无论 SSE 端点 URL 中有任何路径组件。
 
-#### 2.3.3 Fallbacks for Servers without Metadata Discovery
+#### 2.3.3 没有元数据发现的服务器的回退
 
-For servers that do not implement OAuth 2.0 Authorization Server Metadata, clients
-**MUST** use the following default endpoint paths relative to the authorization base URL
-(as defined in [Section
-2.3.2]({{< ref "specification/draft/basic/authorization#232-authorization-base-url" >}})):
+对于不实现 OAuth 2.0 授权服务器元数据的服务器，客户端**必须**使用以下相对于授权基础 URL（如[第 2.3.2 节]({{< ref "specification/draft/basic/authorization#232-authorization-base-url" >}})中定义）的默认端点路径：
 
-| Endpoint               | Default Path | Description                          |
-| ---------------------- | ------------ | ------------------------------------ |
-| Authorization Endpoint | /authorize   | Used for authorization requests      |
-| Token Endpoint         | /token       | Used for token exchange & refresh    |
-| Registration Endpoint  | /register    | Used for dynamic client registration |
+| 端点 | 默认路径 | 描述 |
+| ---- | -------- | ---- |
+| 授权端点 | /authorize | 用于授权请求 |
+| 令牌端点 | /token | 用于令牌交换和刷新 |
+| 注册端点 | /register | 用于动态客户端注册 |
 
-For example, with an SSE endpoint of `https://api.example.com/v1/sse`, the default
-endpoints would be:
+例如，对于 SSE 端点 `https://api.example.com/v1/sse`，默认端点将是：
 
 - `https://api.example.com/authorize`
 - `https://api.example.com/token`
 - `https://api.example.com/register`
 
-Clients **MUST** first attempt to discover endpoints via the metadata document before
-falling back to default paths. When using default paths, all other protocol requirements
-remain unchanged.
+客户端**必须**首先尝试通过元数据文档发现端点，然后再回退到默认路径。当使用默认路径时，所有其他协议要求保持不变。
 
-### 2.3 Dynamic Client Registration
+### 2.3 动态客户端注册
 
-MCP clients and servers **SHOULD** support the
-[OAuth 2.0 Dynamic Client Registration Protocol](https://datatracker.ietf.org/doc/html/rfc7591)
-to allow MCP clients to obtain OAuth client IDs without user interaction. This provides a
-standardized way for clients to automatically register with new servers, which is crucial
-for MCP because:
+MCP 客户端和服务器**应该**支持 [OAuth 2.0 动态客户端注册协议](https://datatracker.ietf.org/doc/html/rfc7591)，以允许 MCP 客户端在不需要用户交互的情况下获取 OAuth 客户端 ID。这为客户端提供了一种标准化的方式来自动注册新服务器，这对 MCP 至关重要，因为：
 
-- Clients cannot know all possible servers in advance
-- Manual registration would create friction for users
-- It enables seamless connection to new servers
-- Servers can implement their own registration policies
+- 客户端无法预先知道所有可能的服务器
+- 手动注册会给用户带来摩擦
+- 它使无缝连接到新服务器成为可能
+- 服务器可以实现自己的注册策略
 
-Any MCP servers that _do not_ support Dynamic Client Registration need to provide
-alternative ways to obtain a client ID (and, if applicable, client secret). For one of
-these servers, MCP clients will have to either:
+任何_不_支持动态客户端注册的 MCP 服务器需要提供获取客户端 ID（以及如果适用，客户端密钥）的替代方式。对于这些服务器，MCP 客户端必须：
 
-1. Hardcode a client ID (and, if applicable, client secret) specifically for that MCP
-   server, or
-2. Present a UI to users that allows them to enter these details, after registering an
-   OAuth client themselves (e.g., through a configuration interface hosted by the
-   server).
+1. 为该 MCP 服务器硬编码客户端 ID（以及如果适用，客户端密钥），或
+2. 向用户呈现 UI，允许他们在自己注册 OAuth 客户端后输入这些详细信息（例如，通过服务器托管的配置界面）。
 
-### 2.4 Authorization Flow Steps
+### 2.4 授权流程步骤
 
-The complete Authorization flow proceeds as follows:
+完整的授权流程如下进行：
 
 ```mermaid
 sequenceDiagram
-    participant B as User-Agent (Browser)
-    participant C as Client
-    participant M as MCP Server
+    participant B as 用户代理（浏览器）
+    participant C as 客户端
+    participant M as MCP 服务器
 
     C->>M: GET /.well-known/oauth-authorization-server
-    alt Server Supports Discovery
-        M->>C: Authorization Server Metadata
-    else No Discovery
-        M->>C: 404 (Use default endpoints)
+    alt 服务器支持发现
+        M->>C: 授权服务器元数据
+    else 无发现
+        M->>C: 404（使用默认端点）
     end
 
-    alt Dynamic Client Registration
+    alt 动态客户端注册
         C->>M: POST /register
-        M->>C: Client Credentials
+        M->>C: 客户端凭据
     end
 
-    Note over C: Generate PKCE Parameters
-    C->>B: Open browser with authorization URL + code_challenge
-    B->>M: Authorization Request
-    Note over M: User /authorizes
-    M->>B: Redirect to callback with authorization code
-    B->>C: Authorization code callback
-    C->>M: Token Request + code_verifier
-    M->>C: Access Token (+ Refresh Token)
-    C->>M: API Requests with Access Token
+    Note over C: 生成 PKCE 参数
+    C->>B: 使用授权 URL + code_challenge 打开浏览器
+    B->>M: 授权请求
+    Note over M: 用户授权
+    M->>B: 带授权码重定向到回调
+    B->>C: 授权码回调
+    C->>M: 令牌请求 + code_verifier
+    M->>C: 访问令牌（+ 刷新令牌）
+    C->>M: 带访问令牌的 API 请求
 ```
 
-#### 2.4.1 Decision Flow Overview
+#### 2.4.1 决策流程概述
 
 ```mermaid
 flowchart TD
-    A[Start Auth Flow] --> B{Check Metadata Discovery}
-    B -->|Available| C[Use Metadata Endpoints]
-    B -->|Not Available| D[Use Default Endpoints]
+    A[开始授权流程] --> B{检查元数据发现}
+    B -->|可用| C[使用元数据端点]
+    B -->|不可用| D[使用默认端点]
 
-    C --> G{Check Registration Endpoint}
+    C --> G{检查注册端点}
     D --> G
 
-    G -->|Available| H[Perform Dynamic Registration]
-    G -->|Not Available| I[Alternative Registration Required]
+    G -->|可用| H[执行动态注册]
+    G -->|不可用| I[需要替代注册]
 
-    H --> J[Start OAuth Flow]
+    H --> J[开始 OAuth 流程]
     I --> J
 
-    J --> K[Generate PKCE Parameters]
-    K --> L[Request Authorization]
-    L --> M[User Authorization]
-    M --> N[Exchange Code for Tokens]
-    N --> O[Use Access Token]
+    J --> K[生成 PKCE 参数]
+    K --> L[请求授权]
+    L --> M[用户授权]
+    M --> N[用授权码交换令牌]
+    N --> O[使用访问令牌]
 ```
 
-### 2.5 Access Token Usage
+### 2.5 访问令牌使用
 
-#### 2.5.1 Token Requirements
+#### 2.5.1 令牌要求
 
-Access token handling **MUST** conform to
-[OAuth 2.1 Section 5](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-5)
-requirements for resource requests. Specifically:
+访问令牌处理**必须**符合 [OAuth 2.1 第 5 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-5)对资源请求的要求。具体来说：
 
-1. MCP client **MUST** use the Authorization request header field
-   [Section 5.1.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-5.1.1):
+1. MCP 客户端**必须**使用授权请求头字段 [第 5.1.1 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-5.1.1)：
 
 ```
 Authorization: Bearer <access-token>
 ```
 
-2. Access tokens **MUST NOT** be included in the URI query string
+2. 访问令牌**禁止**包含在 URI 查询字符串中
 
-Example request:
+请求示例：
 
 ```http
 GET /v1/contexts HTTP/1.1
@@ -263,124 +220,111 @@ Host: mcp.example.com
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
-#### 2.5.2 Token Handling
+#### 2.5.2 令牌处理
 
-Resource servers **MUST** validate access tokens as described in
-[Section 5.2](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-5.2).
-If validation fails, servers **MUST** respond according to
-[Section 5.3](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-5.3)
-error handling requirements. Invalid or expired tokens **MUST** receive a HTTP 401
-response.
+资源服务器**必须**按照 [第 5.2 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-5.2)中所述验证访问令牌。如果验证失败，服务器**必须**按照 [第 5.3 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-5.3)错误处理要求进行响应。无效或过期的令牌**必须**收到 HTTP 401 响应。
 
-### 2.6 Security Considerations
+### 2.6 安全考虑
 
-The following security requirements **MUST** be implemented:
+**必须**实现以下安全要求：
 
-1. Clients **MUST** securely store tokens following OAuth 2.0 best practices
-2. Servers **SHOULD** enforce token expiration and rotation
-3. All authorization endpoints **MUST** be served over HTTPS
-4. Servers **MUST** validate redirect URIs to prevent open redirect vulnerabilities
-5. Redirect URIs **MUST** be either localhost URLs or HTTPS URLs
+1. 客户端**必须**按照 OAuth 2.0 最佳实践安全地存储令牌
+2. 服务器**应该**强制令牌过期和轮换
+3. 所有授权端点**必须**通过 HTTPS 提供服务
+4. 服务器**必须**验证重定向 URI 以防止开放重定向漏洞
+5. 重定向 URI **必须**是 localhost URL 或 HTTPS URL
 
-### 2.7 Error Handling
+### 2.7 错误处理
 
-Servers **MUST** return appropriate HTTP status codes for authorization errors:
+服务器**必须**为授权错误返回适当的 HTTP 状态码：
 
-| Status Code | Description  | Usage                                      |
-| ----------- | ------------ | ------------------------------------------ |
-| 401         | Unauthorized | Authorization required or token invalid    |
-| 403         | Forbidden    | Invalid scopes or insufficient permissions |
-| 400         | Bad Request  | Malformed authorization request            |
+| 状态码 | 描述 | 用途 |
+| ------ | ---- | ---- |
+| 401 | 未授权 | 需要授权或令牌无效 |
+| 403 | 禁止 | 无效的作用域或权限不足 |
+| 400 | 错误请求 | 格式错误的授权请求 |
 
-### 2.8 Implementation Requirements
+### 2.8 实现要求
 
-1. Implementations **MUST** follow OAuth 2.1 security best practices
-2. PKCE is **REQUIRED** for all clients
-3. Token rotation **SHOULD** be implemented for enhanced security
-4. Token lifetimes **SHOULD** be limited based on security requirements
+1. 实现**必须**遵循 OAuth 2.1 安全最佳实践
+2. 所有客户端**必须**使用 PKCE
+3. **应该**实现令牌轮换以增强安全性
+4. 令牌生命周期**应该**根据安全要求进行限制
 
-### 2.9 Third-Party Authorization Flow
+### 2.9 第三方授权流程
 
-#### 2.9.1 Overview
+#### 2.9.1 概述
 
-MCP servers **MAY** support delegated authorization through third-party authorization
-servers. In this flow, the MCP server acts as both an OAuth client (to the third-party
-auth server) and an OAuth authorization server (to the MCP client).
+MCP 服务器**可以**通过第三方授权服务器支持委托授权。在此流程中，MCP 服务器既作为 OAuth 客户端（对第三方授权服务器）又作为 OAuth 授权服务器（对 MCP 客户端）。
 
-#### 2.9.2 Flow Description
+#### 2.9.2 流程描述
 
-The third-party authorization flow comprises these steps:
+第三方授权流程包括以下步骤：
 
-1. MCP client initiates standard OAuth flow with MCP server
-2. MCP server redirects user to third-party authorization server
-3. User authorizes with third-party server
-4. Third-party server redirects back to MCP server with authorization code
-5. MCP server exchanges code for third-party access token
-6. MCP server generates its own access token bound to the third-party session
-7. MCP server completes original OAuth flow with MCP client
+1. MCP 客户端与 MCP 服务器启动标准 OAuth 流程
+2. MCP 服务器将用户重定向到第三方授权服务器
+3. 用户向第三方服务器授权
+4. 第三方服务器带授权码重定向回 MCP 服务器
+5. MCP 服务器用授权码交换第三方访问令牌
+6. MCP 服务器生成自己的访问令牌，绑定到第三方会话
+7. MCP 服务器完成与 MCP 客户端的原始 OAuth 流程
 
 ```mermaid
 sequenceDiagram
-    participant B as User-Agent (Browser)
-    participant C as MCP Client
-    participant M as MCP Server
-    participant T as Third-Party Auth Server
+    participant B as 用户代理（浏览器）
+    participant C as MCP 客户端
+    participant M as MCP 服务器
+    participant T as 第三方授权服务器
 
-    C->>M: Initial OAuth Request
-    M->>B: Redirect to Third-Party /authorize
-    B->>T: Authorization Request
-    Note over T: User authorizes
-    T->>B: Redirect to MCP Server callback
-    B->>M: Authorization code
-    M->>T: Exchange code for token
-    T->>M: Third-party access token
-    Note over M: Generate bound MCP token
-    M->>B: Redirect to MCP Client callback
-    B->>C: MCP authorization code
-    C->>M: Exchange code for token
-    M->>C: MCP access token
+    C->>M: 初始 OAuth 请求
+    M->>B: 重定向到第三方 /authorize
+    B->>T: 授权请求
+    Note over T: 用户授权
+    T->>B: 重定向到 MCP 服务器回调
+    B->>M: 授权码
+    M->>T: 用授权码交换令牌
+    T->>M: 第三方访问令牌
+    Note over M: 生成绑定的 MCP 令牌
+    M->>B: 重定向到 MCP 客户端回调
+    B->>C: MCP 授权码
+    C->>M: 用授权码交换令牌
+    M->>C: MCP 访问令牌
 ```
 
-#### 2.9.3 Session Binding Requirements
+#### 2.9.3 会话绑定要求
 
-MCP servers implementing third-party authorization **MUST**:
+实现第三方授权的 MCP 服务器**必须**：
 
-1. Maintain secure mapping between third-party tokens and issued MCP tokens
-2. Validate third-party token status before honoring MCP tokens
-3. Implement appropriate token lifecycle management
-4. Handle third-party token expiration and renewal
+1. 维护第三方令牌和已发布 MCP 令牌之间的安全映射
+2. 在接受 MCP 令牌之前验证第三方令牌状态
+3. 实现适当的令牌生命周期管理
+4. 处理第三方令牌过期和更新
 
-#### 2.9.4 Security Considerations
+#### 2.9.4 安全考虑
 
-When implementing third-party authorization, servers **MUST**:
+在实现第三方授权时，服务器**必须**：
 
-1. Validate all redirect URIs
-2. Securely store third-party credentials
-3. Implement appropriate session timeout handling
-4. Consider security implications of token chaining
-5. Implement proper error handling for third-party auth failures
+1. 验证所有重定向 URI
+2. 安全地存储第三方凭据
+3. 实现适当的会话超时处理
+4. 考虑令牌链接的安全影响
+5. 为第三方认证失败实现适当的错误处理
 
-## 3. Best Practices
+## 3. 最佳实践
 
-#### 3.1 Local clients as Public OAuth 2.1 Clients
+#### 3.1 作为公共 OAuth 2.1 客户端的本地客户端
 
-We strongly recommend that local clients implement OAuth 2.1 as a public client:
+我们强烈建议本地客户端作为公共客户端实现 OAuth 2.1：
 
-1. Utilizing code challenges (PKCE) for authorization requests to prevent interception
-   attacks
-2. Implementing secure token storage appropriate for the local system
-3. Following token refresh best practices to maintain sessions
-4. Properly handling token expiration and renewal
+1. 利用授权码挑战（PKCE）进行授权请求，以防止拦截攻击
+2. 实现适合本地系统的安全令牌存储
+3. 遵循令牌刷新最佳实践以维持会话
+4. 适当处理令牌过期和更新
 
-#### 3.2 Authorization Metadata Discovery
+#### 3.2 授权元数据发现
 
-We strongly recommend that all clients implement metadata discovery. This reduces the
-need for users to provide endpoints manually or clients to fallback to the defined
-defaults.
+我们强烈建议所有客户端实现元数据发现。这减少了用户手动提供端点或客户端回退到定义的默认值的需要。
 
-#### 3.3 Dynamic Client Registration
+#### 3.3 动态客户端注册
 
-Since clients do not know the set of MCP servers in advance, we strongly recommend the
-implementation of dynamic client registration. This allows applications to automatically
-register with the MCP server, and removes the need for users to obtain client ids
-manually.
+由于客户端不预先知道 MCP 服务器集，我们强烈建议实现动态客户端注册。这允许应用程序自动注册到 MCP 服务器，并消除了用户手动获取客户端 ID 的需要。

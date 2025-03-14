@@ -1,33 +1,29 @@
 ---
-title: Server Features
+title: 服务器功能
 cascade:
   type: docs
 weight: 3
 ---
 
-{{< callout type="info" >}} **Protocol Revision**: {{< param protocolRevision >}}
+{{< callout type="info" >}} **协议版本**：{{< param protocolRevision >}}
 {{< /callout >}}
 
-Servers provide the fundamental building blocks for adding context to language models via
-MCP. These primitives enable rich interactions between clients, servers, and language
-models:
+服务器提供通过 MCP 向语言模型添加上下文的基本构建块。这些原语实现了客户端、服务器和语言模型之间的丰富交互：
 
-- **Prompts**: Pre-defined templates or instructions that guide language model
-  interactions
-- **Resources**: Structured data or content that provides additional context to the model
-- **Tools**: Executable functions that allow models to perform actions or retrieve
-  information
+- **提示**：预定义的模板或指令，指导语言模型交互
+- **资源**：提供给模型额外上下文的结构化数据或内容
+- **工具**：允许模型执行操作或检索信息的可执行函数
 
-Each primitive can be summarized in the following control hierarchy:
+每个原语可以在以下控制层次结构中总结：
 
-| Primitive | Control                | Description                                        | Example                         |
-| --------- | ---------------------- | -------------------------------------------------- | ------------------------------- |
-| Prompts   | User-controlled        | Interactive templates invoked by user choice       | Slash commands, menu options    |
-| Resources | Application-controlled | Contextual data attached and managed by the client | File contents, git history      |
-| Tools     | Model-controlled       | Functions exposed to the LLM to take actions       | API POST requests, file writing |
+| 原语   | 控制           | 描述                                 | 示例                      |
+| ------ | -------------- | ------------------------------------ | ------------------------- |
+| 提示   | 用户控制       | 由用户选择调用的交互式模板           | 斜杠命令、菜单选项        |
+| 资源   | 应用程序控制   | 由客户端附加和管理的上下文数据       | 文件内容、git 历史        |
+| 工具   | 模型控制       | 暴露给 LLM 以采取行动的函数          | API POST 请求、文件写入   |
 
-Explore these key primitives in more detail below:
+在下面更详细地探索这些关键原语：
 
-{{< cards >}} {{< card link="prompts" title="Prompts" icon="chat-alt-2" >}}
-{{< card link="resources" title="Resources" icon="document" >}}
-{{< card link="tools" title="Tools" icon="adjustments" >}} {{< /cards >}}
+{{< cards >}} {{< card link="prompts" title="提示" icon="chat-alt-2" >}}
+{{< card link="resources" title="资源" icon="document" >}}
+{{< card link="tools" title="工具" icon="adjustments" >}} {{< /cards >}}

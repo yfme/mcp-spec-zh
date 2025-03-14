@@ -1,5 +1,5 @@
 ---
-title: Specification
+title: 规范
 cascade:
   type: docs
 breadcrumbs: false

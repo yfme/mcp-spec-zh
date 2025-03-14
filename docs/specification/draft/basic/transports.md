@@ -1,92 +1,77 @@
 ---
-title: Transports
+title: 传输
 type: docs
 weight: 10
 ---
 
-{{< callout type="info" >}} **Protocol Revision**: draft {{< /callout >}}
+{{< callout type="info" >}} **协议版本**：草案 {{< /callout >}}
 
-MCP uses JSON-RPC to encode messages. JSON-RPC messages **MUST** be UTF-8 encoded.
+MCP 使用 JSON-RPC 编码消息。JSON-RPC 消息**必须**使用 UTF-8 编码。
 
-The protocol currently defines two standard transport mechanisms for client-server
-communication:
+该协议目前定义了两种标准传输机制用于客户端-服务器通信：
 
-1. [stdio](#stdio), communication over standard in and standard out
-2. [HTTP with Server-Sent Events](#http-with-sse) (SSE)
+1. [stdio](#stdio)，通过标准输入和标准输出进行通信
+2. [带有服务器发送事件的 HTTP](#http-with-sse) (SSE)
 
-Clients **SHOULD** support stdio whenever possible.
+客户端在可能的情况下**应该**支持 stdio。
 
-It is also possible for clients and servers to implement
-[custom transports](#custom-transports) in a pluggable fashion.
+客户端和服务器也可以以可插拔的方式实现[自定义传输](#custom-transports)。
 
 ## stdio
 
-In the **stdio** transport:
+在 **stdio** 传输中：
 
-- The client launches the MCP server as a subprocess.
-- The server receives JSON-RPC messages on its standard input (`stdin`) and writes
-  responses to its standard output (`stdout`).
-- Messages are delimited by newlines, and **MUST NOT** contain embedded newlines.
-- The server **MAY** write UTF-8 strings to its standard error (`stderr`) for logging
-  purposes. Clients **MAY** capture, forward, or ignore this logging.
-- The server **MUST NOT** write anything to its `stdout` that is not a valid MCP message.
-- The client **MUST NOT** write anything to the server's `stdin` that is not a valid MCP
-  message.
+- 客户端将 MCP 服务器作为子进程启动。
+- 服务器在其标准输入（`stdin`）上接收 JSON-RPC 消息，并将响应写入其标准输出（`stdout`）。
+- 消息由换行符分隔，并且**不得**包含嵌入的换行符。
+- 服务器**可以**将 UTF-8 字符串写入其标准错误（`stderr`）用于日志记录。客户端**可以**捕获、转发或忽略此日志。
+- 服务器**不得**向其 `stdout` 写入任何不是有效 MCP 消息的内容。
+- 客户端**不得**向服务器的 `stdin` 写入任何不是有效 MCP 消息的内容。
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Server Process
 
-    Client->>+Server Process: Launch subprocess
-    loop Message Exchange
-        Client->>Server Process: Write to stdin
-        Server Process->>Client: Write to stdout
-        Server Process--)Client: Optional logs on stderr
+    Client->>+Server Process: 启动子进程
+    loop 消息交换
+        Client->>Server Process: 写入 stdin
+        Server Process->>Client: 写入 stdout
+        Server Process--)Client: 可选的在 stderr 上记录日志
     end
-    Client->>Server Process: Close stdin, terminate subprocess
+    Client->>Server Process: 关闭 stdin，终止子进程
     deactivate Server Process
 ```
 
 ## HTTP with SSE
 
-In the **SSE** transport, the server operates as an independent process that can handle
-multiple client connections.
+在 **SSE** 传输中，服务器作为一个独立的进程运行，可以处理多个客户端连接。
 
-The server **MUST** provide two endpoints:
+服务器**必须**提供两个端点：
 
-1. An SSE endpoint, for clients to establish a connection and receive messages from the
-   server
-2. A regular HTTP POST endpoint for clients to send messages to the server
+1. 一个 SSE 端点，供客户端建立连接并接收来自服务器的消息
+2. 一个常规的 HTTP POST 端点，供客户端向服务器发送消息
 
-When a client connects, the server **MUST** send an `endpoint` event containing a URI for
-the client to use for sending messages. All subsequent client messages **MUST** be sent
-as HTTP POST requests to this endpoint.
+当客户端连接时，服务器**必须**发送一个包含客户端用于发送消息的 URI 的 `endpoint` 事件。所有后续的客户端消息**必须**作为 HTTP POST 请求发送到此端点。
 
-Server messages are sent as SSE `message` events, with the message content encoded as
-JSON in the event data.
+服务器消息作为 SSE `message` 事件发送，消息内容在事件数据中编码为 JSON。
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Server
 
-    Client->>Server: Open SSE connection
-    Server->>Client: endpoint event
-    loop Message Exchange
-        Client->>Server: HTTP POST messages
-        Server->>Client: SSE message events
+    Client->>Server: 打开 SSE 连接
+    Server->>Client: endpoint 事件
+    loop 消息交换
+        Client->>Server: HTTP POST 消息
+        Server->>Client: SSE message 事件
     end
-    Client->>Server: Close SSE connection
+    Client->>Server: 关闭 SSE 连接
 ```
 
-## Custom Transports
+## 自定义传输
 
-Clients and servers **MAY** implement additional custom transport mechanisms to suit
-their specific needs. The protocol is transport-agnostic and can be implemented over any
-communication channel that supports bidirectional message exchange.
+客户端和服务器**可以**实现额外的自定义传输机制以满足其特定需求。该协议与传输无关，可以在任何支持双向消息交换的通信通道上实现。
 
-Implementers who choose to support custom transports **MUST** ensure they preserve the
-JSON-RPC message format and lifecycle requirements defined by MCP. Custom transports
-**SHOULD** document their specific connection establishment and message exchange patterns
-to aid interoperability.
+选择支持自定义传输的实现者**必须**确保它们保留 MCP 定义的 JSON-RPC 消息格式和生命周期要求。自定义传输**应该**记录其特定的连接建立和消息交换模式，以帮助互操作性。

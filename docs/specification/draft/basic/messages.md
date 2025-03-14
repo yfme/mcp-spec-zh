@@ -1,18 +1,16 @@
 ---
-title: Messages
+title: 消息
 type: docs
 weight: 20
 ---
 
-{{< callout type="info" >}} **Protocol Revision**: draft {{< /callout >}}
+{{< callout type="info" >}} **协议版本**：草案 {{< /callout >}}
 
-All messages in MCP **MUST** follow the
-[JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification. The protocol defines
-three types of messages:
+MCP 中的所有消息**必须**遵循 [JSON-RPC 2.0](https://www.jsonrpc.org/specification) 规范。该协议定义了三种类型的消息：
 
-## Requests
+## 请求
 
-Requests are sent from the client to the server or vice versa.
+请求从客户端发送到服务器，或从服务器发送到客户端。
 
 ```typescript
 {
@@ -25,14 +23,13 @@ Requests are sent from the client to the server or vice versa.
 }
 ```
 
-- Requests **MUST** include a string or integer ID.
-- Unlike base JSON-RPC, the ID **MUST NOT** be `null`.
-- The request ID **MUST NOT** have been previously used by the requestor within the same
-  session.
+- 请求**必须**包含字符串或整数 ID。
+- 与基础 JSON-RPC 不同，ID**不得**为 `null`。
+- 请求 ID 在同一会话中**不得**被请求者先前使用过。
 
-## Responses
+## 响应
 
-Responses are sent in reply to requests.
+响应作为对请求的回复发送。
 
 ```typescript
 {
@@ -49,14 +46,13 @@ Responses are sent in reply to requests.
 }
 ```
 
-- Responses **MUST** include the same ID as the request they correspond to.
-- Either a `result` or an `error` **MUST** be set. A response **MUST NOT** set both.
-- Error codes **MUST** be integers.
+- 响应**必须**包含与其对应的请求相同的 ID。
+- **必须**设置 `result` 或 `error`。响应**不得**同时设置两者。
+- 错误代码**必须**是整数。
 
-## Notifications
+## 通知
 
-Notifications are sent from the client to the server or vice versa. The receiver **MUST NOT**
-send a response.
+通知从客户端发送到服务器，或从服务器发送到客户端。接收者**不得**发送响应。
 
 ```typescript
 {
@@ -68,4 +64,4 @@ send a response.
 }
 ```
 
-- Notifications **MUST NOT** include an ID.
+- 通知**不得**包含 ID。

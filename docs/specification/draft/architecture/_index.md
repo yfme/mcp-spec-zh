@@ -1,35 +1,31 @@
 ---
-title: Architecture
+title: 架构
 cascade:
   type: docs
 weight: 1
 ---
 
-The Model Context Protocol (MCP) follows a client-host-server architecture where each
-host can run multiple client instances. This architecture enables users to integrate AI
-capabilities across applications while maintaining clear security boundaries and
-isolating concerns. Built on JSON-RPC, MCP provides a stateful session protocol focused
-on context exchange and sampling coordination between clients and servers.
+模型上下文协议（MCP）采用客户端-主机-服务器架构，每个主机可以运行多个客户端实例。这种架构使用户能够在应用程序中集成 AI 功能，同时保持明确的安全边界并隔离关注点。MCP 基于 JSON-RPC 构建，提供有状态会话协议，专注于客户端和服务器之间的上下文交换和采样协调。
 
-## Core Components
+## 核心组件
 
 ```mermaid
 graph LR
-    subgraph "Application Host Process"
-        H[Host]
-        C1[Client 1]
-        C2[Client 2]
-        C3[Client 3]
+    subgraph "应用程序主机进程"
+        H[主机]
+        C1[客户端 1]
+        C2[客户端 2]
+        C3[客户端 3]
         H --> C1
         H --> C2
         H --> C3
     end
 
-    subgraph "Local machine"
-        S1[Server 1<br>Files & Git]
-        S2[Server 2<br>Database]
-        R1[("Local<br>Resource A")]
-        R2[("Local<br>Resource B")]
+    subgraph "本地机器"
+        S1[服务器 1<br>文件和 Git]
+        S2[服务器 2<br>数据库]
+        R1[("本地<br>资源 A")]
+        R2[("本地<br>资源 B")]
 
         C1 --> S1
         C2 --> S2
@@ -37,107 +33,99 @@ graph LR
         S2 <--> R2
     end
 
-    subgraph "Internet"
-        S3[Server 3<br>External APIs]
-        R3[("Remote<br>Resource C")]
+    subgraph "互联网"
+        S3[服务器 3<br>外部 API]
+        R3[("远程<br>资源 C")]
 
         C3 --> S3
         S3 <--> R3
     end
 ```
 
-### Host
+### 主机
 
-The host process acts as the container and coordinator:
+主机进程充当容器和协调器：
 
-- Creates and manages multiple client instances
-- Controls client connection permissions and lifecycle
-- Enforces security policies and consent requirements
-- Handles user authorization decisions
-- Coordinates AI/LLM integration and sampling
-- Manages context aggregation across clients
+- 创建和管理多个客户端实例
+- 控制客户端连接权限和生命周期
+- 执行安全策略和同意要求
+- 处理用户授权决策
+- 协调 AI/LLM 集成和采样
+- 管理跨客户端的上下文聚合
 
-### Clients
+### 客户端
 
-Each client is created by the host and maintains an isolated server connection:
+每个客户端由主机创建并维护隔离的服务器连接：
 
-- Establishes one stateful session per server
-- Handles protocol negotiation and capability exchange
-- Routes protocol messages bidirectionally
-- Manages subscriptions and notifications
-- Maintains security boundaries between servers
+- 每个服务器建立一个有状态会话
+- 处理协议协商和能力交换
+- 双向路由协议消息
+- 管理订阅和通知
+- 维护服务器之间的安全边界
 
-A host application creates and manages multiple clients, with each client having a 1:1
-relationship with a particular server.
+主机应用程序创建和管理多个客户端，每个客户端与特定服务器有 1:1 的关系。
 
-### Servers
+### 服务器
 
-Servers provide specialized context and capabilities:
+服务器提供专门的上下文和功能：
 
-- Expose resources, tools and prompts via MCP primitives
-- Operate independently with focused responsibilities
-- Request sampling through client interfaces
-- Must respect security constraints
-- Can be local processes or remote services
+- 通过 MCP 原语公开资源、工具和提示
+- 独立运行，职责明确
+- 通过客户端接口请求采样
+- 必须尊重安全约束
+- 可以是本地进程或远程服务
 
-## Design Principles
+## 设计原则
 
-MCP is built on several key design principles that inform its architecture and
-implementation:
+MCP 建立在几个关键设计原则之上，这些原则指导其架构和实现：
 
-1. **Servers should be extremely easy to build**
+1. **服务器应该非常容易构建**
 
-   - Host applications handle complex orchestration responsibilities
-   - Servers focus on specific, well-defined capabilities
-   - Simple interfaces minimize implementation overhead
-   - Clear separation enables maintainable code
+   - 主机应用程序处理复杂的协调责任
+   - 服务器专注于特定的、定义明确的功能
+   - 简单的接口最小化实现开销
+   - 清晰的分离使代码可维护
 
-2. **Servers should be highly composable**
+2. **服务器应该高度可组合**
 
-   - Each server provides focused functionality in isolation
-   - Multiple servers can be combined seamlessly
-   - Shared protocol enables interoperability
-   - Modular design supports extensibility
+   - 每个服务器独立提供专注的功能
+   - 多个服务器可以无缝组合
+   - 共享协议实现互操作性
+   - 模块化设计支持可扩展性
 
-3. **Servers should not be able to read the whole conversation, nor "see into" other
-   servers**
+3. **服务器不应该能够读取整个对话，也不应该"窥视"其他服务器**
 
-   - Servers receive only necessary contextual information
-   - Full conversation history stays with the host
-   - Each server connection maintains isolation
-   - Cross-server interactions are controlled by the host
-   - Host process enforces security boundaries
+   - 服务器只接收必要的上下文信息
+   - 完整的对话历史保存在主机中
+   - 每个服务器连接保持隔离
+   - 跨服务器交互由主机控制
+   - 主机进程执行安全边界
 
-4. **Features can be added to servers and clients progressively**
-   - Core protocol provides minimal required functionality
-   - Additional capabilities can be negotiated as needed
-   - Servers and clients evolve independently
-   - Protocol designed for future extensibility
-   - Backwards compatibility is maintained
+4. **功能可以逐步添加到服务器和客户端**
+   - 核心协议提供最少的必需功能
+   - 可以根据需要协商额外的能力
+   - 服务器和客户端独立发展
+   - 协议设计考虑未来可扩展性
+   - 保持向后兼容性
 
-## Message Types
+## 消息类型
 
-MCP defines three core message types based on
-[JSON-RPC 2.0](https://www.jsonrpc.org/specification):
+MCP 基于 [JSON-RPC 2.0](https://www.jsonrpc.org/specification) 定义了三种核心消息类型：
 
-- **Requests**: Bidirectional messages with method and parameters expecting a response
-- **Responses**: Successful results or errors matching specific request IDs
-- **Notifications**: One-way messages requiring no response
+- **请求**：双向消息，包含方法和参数，期望得到响应
+- **响应**：成功的结果或与特定请求 ID 匹配的错误
+- **通知**：不需要响应的单向消息
 
-Each message type follows the JSON-RPC 2.0 specification for structure and delivery
-semantics.
+每种消息类型都遵循 JSON-RPC 2.0 规范的结构和传递语义。
 
-## Capability Negotiation
+## 能力协商
 
-The Model Context Protocol uses a capability-based negotiation system where clients and
-servers explicitly declare their supported features during initialization. Capabilities
-determine which protocol features and primitives are available during a session.
+模型上下文协议使用基于能力的协商系统，客户端和服务器在初始化期间明确声明其支持的功能。能力决定了会话期间可用的协议功能和原语。
 
-- Servers declare capabilities like resource subscriptions, tool support, and prompt
-  templates
-- Clients declare capabilities like sampling support and notification handling
-- Both parties must respect declared capabilities throughout the session
-- Additional capabilities can be negotiated through extensions to the protocol
+- 服务器声明能力，如资源订阅、工具支持和提示模板
+- 客户端声明能力，如采样支持和通知处理
+- 双方必须在整个会话中尊重声明的能力
+- 可以通过协议扩展协商额外能力
 
 ```mermaid
 sequenceDiagram
@@ -145,46 +133,41 @@ sequenceDiagram
     participant Client
     participant Server
 
-    Host->>+Client: Initialize client
-    Client->>+Server: Initialize session with capabilities
-    Server-->>Client: Respond with supported capabilities
+    Host->>+Client: 初始化客户端
+    Client->>+Server: 使用能力初始化会话
+    Server-->>Client: 响应支持的能力
 
-    Note over Host,Server: Active Session with Negotiated Features
+    Note over Host,Server: 具有协商功能的活动会话
 
-    loop Client Requests
-        Host->>Client: User- or model-initiated action
-        Client->>Server: Request (tools/resources)
-        Server-->>Client: Response
-        Client-->>Host: Update UI or respond to model
+    loop 客户端请求
+        Host->>Client: 用户或模型发起的操作
+        Client->>Server: 请求（工具/资源）
+        Server-->>Client: 响应
+        Client-->>Host: 更新 UI 或响应模型
     end
 
-    loop Server Requests
-        Server->>Client: Request (sampling)
-        Client->>Host: Forward to AI
-        Host-->>Client: AI response
-        Client-->>Server: Response
+    loop 服务器请求
+        Server->>Client: 请求（采样）
+        Client->>Host: 转发给 AI
+        Host-->>Client: AI 响应
+        Client-->>Server: 响应
     end
 
-    loop Notifications
-        Server--)Client: Resource updates
-        Client--)Server: Status changes
+    loop 通知
+        Server--)Client: 资源更新
+        Client--)Server: 状态变化
     end
 
-    Host->>Client: Terminate
-    Client->>-Server: End session
+    Host->>Client: 终止
+    Client->>-Server: 结束会话
     deactivate Server
 ```
 
-Each capability unlocks specific protocol features for use during the session. For
-example:
+每种能力都能在会话期间解锁特定的协议功能。例如：
 
-- Implemented [server features]({{< ref "/specification/draft/server" >}}) must be
-  advertised in the server's capabilities
-- Emitting resource subscription notifications requires the server to declare
-  subscription support
-- Tool invocation requires the server to declare tool capabilities
-- [Sampling]({{< ref "/specification/draft/client" >}}) requires the client to declare
-  support in its capabilities
+- 实现的[服务器功能]({{< ref "/specification/draft/server" >}})必须在服务器的能力中公布
+- 发出资源订阅通知需要服务器声明订阅支持
+- 工具调用需要服务器声明工具能力
+- [采样]({{< ref "/specification/draft/client" >}})需要客户端在其能力中声明支持
 
-This capability negotiation ensures clients and servers have a clear understanding of
-supported functionality while maintaining protocol extensibility.
+这种能力协商确保客户端和服务器对支持的功能有明确的理解，同时保持协议的可扩展性。

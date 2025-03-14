@@ -1,35 +1,27 @@
 ---
-title: Prompts
+title: 提示
 weight: 10
 ---
 
-{{< callout type="info" >}} **Protocol Revision**: draft {{< /callout >}}
+{{< callout type="info" >}} **协议版本**：草案 {{< /callout >}}
 
-The Model Context Protocol (MCP) provides a standardized way for servers to expose prompt
-templates to clients. Prompts allow servers to provide structured messages and
-instructions for interacting with language models. Clients can discover available
-prompts, retrieve their contents, and provide arguments to customize them.
+模型上下文协议（MCP）为服务器向客户端公开提示模板提供了标准化方式。提示允许服务器提供与语言模型交互的结构化消息和指令。客户端可以发现可用的提示、检索其内容并提供参数来自定义它们。
 
-## User Interaction Model
+## 用户交互模型
 
-Prompts are designed to be **user-controlled**, meaning they are exposed from servers to
-clients with the intention of the user being able to explicitly select them for use.
+提示被设计为**用户控制**的，这意味着它们从服务器公开给客户端，目的是让用户能够明确选择它们使用。
 
-Typically, prompts would be triggered through user-initiated commands in the user
-interface, which allows users to naturally discover and invoke available prompts.
+通常，提示会通过用户界面中的用户发起命令触发，这允许用户自然地发现和调用可用的提示。
 
-For example, as slash commands:
+例如，作为斜杠命令：
 
-![Example of prompt exposed as slash command](slash-command.png)
+![作为斜杠命令公开的提示示例](slash-command.png)
 
-However, implementors are free to expose prompts through any interface pattern that suits
-their needs&mdash;the protocol itself does not mandate any specific user interaction
-model.
+然而，实现者可以通过任何适合其需求的界面模式公开提示&mdash;协议本身不要求任何特定的用户交互模型。
 
-## Capabilities
+## 能力
 
-Servers that support prompts **MUST** declare the `prompts` capability during
-[initialization]({{< ref "/specification/draft/basic/lifecycle#initialization" >}}):
+支持提示的服务器**必须**在[初始化]({{< ref "/specification/draft/basic/lifecycle#initialization" >}})期间声明 `prompts` 能力：
 
 ```json
 {
@@ -41,17 +33,15 @@ Servers that support prompts **MUST** declare the `prompts` capability during
 }
 ```
 
-`listChanged` indicates whether the server will emit notifications when the list of
-available prompts changes.
+`listChanged` 表示服务器是否会在可用提示列表更改时发出通知。
 
-## Protocol Messages
+## 协议消息
 
-### Listing Prompts
+### 列出提示
 
-To retrieve available prompts, clients send a `prompts/list` request. This operation
-supports [pagination]({{< ref "/specification/draft/server/utilities/pagination" >}}).
+要检索可用的提示，客户端发送 `prompts/list` 请求。此操作支持[分页]({{< ref "/specification/draft/server/utilities/pagination" >}})。
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -59,12 +49,12 @@ supports [pagination]({{< ref "/specification/draft/server/utilities/pagination"
   "id": 1,
   "method": "prompts/list",
   "params": {
-    "cursor": "optional-cursor-value"
+    "cursor": "可选的光标值"
   }
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -74,28 +64,26 @@ supports [pagination]({{< ref "/specification/draft/server/utilities/pagination"
     "prompts": [
       {
         "name": "code_review",
-        "description": "Asks the LLM to analyze code quality and suggest improvements",
+        "description": "要求 LLM 分析代码质量并提出改进建议",
         "arguments": [
           {
             "name": "code",
-            "description": "The code to review",
+            "description": "要审查的代码",
             "required": true
           }
         ]
       }
     ],
-    "nextCursor": "next-page-cursor"
+    "nextCursor": "下一页光标"
   }
 }
 ```
 
-### Getting a Prompt
+### 获取提示
 
-To retrieve a specific prompt, clients send a `prompts/get` request. Arguments may be
-auto-completed through [the completion
-API]({{< ref "/specification/draft/server/utilities/completion" >}}).
+要检索特定提示，客户端发送 `prompts/get` 请求。参数可以通过[完成 API]({{< ref "/specification/draft/server/utilities/completion" >}})自动完成。
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -111,20 +99,20 @@ API]({{< ref "/specification/draft/server/utilities/completion" >}}).
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 2,
   "result": {
-    "description": "Code review prompt",
+    "description": "代码审查提示",
     "messages": [
       {
         "role": "user",
         "content": {
           "type": "text",
-          "text": "Please review this Python code:\ndef hello():\n    print('world')"
+          "text": "请审查这段 Python 代码：\ndef hello():\n    print('world')"
         }
       }
     ]
@@ -132,10 +120,9 @@ API]({{< ref "/specification/draft/server/utilities/completion" >}}).
 }
 ```
 
-### List Changed Notification
+### 列表更改通知
 
-When the list of available prompts changes, servers that declared the `listChanged`
-capability **SHOULD** send a notification:
+当可用提示列表更改时，声明了 `listChanged` 能力的服务器**应该**发送通知：
 
 ```json
 {
@@ -144,92 +131,90 @@ capability **SHOULD** send a notification:
 }
 ```
 
-## Message Flow
+## 消息流
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Server
 
-    Note over Client,Server: Discovery
+    Note over Client,Server: 发现
     Client->>Server: prompts/list
-    Server-->>Client: List of prompts
+    Server-->>Client: 提示列表
 
-    Note over Client,Server: Usage
+    Note over Client,Server: 使用
     Client->>Server: prompts/get
-    Server-->>Client: Prompt content
+    Server-->>Client: 提示内容
 
     opt listChanged
-      Note over Client,Server: Changes
+      Note over Client,Server: 变更
       Server--)Client: prompts/list_changed
       Client->>Server: prompts/list
-      Server-->>Client: Updated prompts
+      Server-->>Client: 更新的提示
     end
 ```
 
-## Data Types
+## 数据类型
 
-### Prompt
+### 提示
 
-A prompt definition includes:
+提示定义包括：
 
-- `name`: Unique identifier for the prompt
-- `description`: Optional human-readable description
-- `arguments`: Optional list of arguments for customization
+- `name`：提示的唯一标识符
+- `description`：可选的人类可读描述
+- `arguments`：用于自定义的可选参数列表
 
 ### PromptMessage
 
-Messages in a prompt can contain:
+提示中的消息可以包含：
 
-- `role`: Either "user" or "assistant" to indicate the speaker
-- `content`: One of the following content types:
+- `role`："user" 或 "assistant" 以指示说话者
+- `content`：以下内容类型之一：
 
-#### Text Content
+#### 文本内容
 
-Text content represents plain text messages:
+文本内容表示纯文本消息：
 
 ```json
 {
   "type": "text",
-  "text": "The text content of the message"
+  "text": "消息的文本内容"
 }
 ```
 
-This is the most common content type used for natural language interactions.
+这是用于自然语言交互的最常见内容类型。
 
-#### Image Content
+#### 图像内容
 
-Image content allows including visual information in messages:
+图像内容允许在消息中包含视觉信息：
 
 ```json
 {
   "type": "image",
-  "data": "base64-encoded-image-data",
+  "data": "base64-编码的图像数据",
   "mimeType": "image/png"
 }
 ```
 
-The image data **MUST** be base64-encoded and include a valid MIME type. This enables
-multi-modal interactions where visual context is important.
+图像数据**必须**是 base64 编码的，并包含有效的 MIME 类型。这使得视觉上下文重要的多模态交互成为可能。
 
-#### Audio Content
+#### 音频内容
 
-Audio content allows including audio information in messages:
+音频内容允许在消息中包含音频信息：
 
 ```json
 {
   "type": "audio",
-  "data": "base64-encoded-audio-data",
+  "data": "base64-编码的音频数据",
   "mimeType": "audio/wav"
 }
 ```
 
-The audio data MUST be base64-encoded and include a valid MIME type. This enables
-multi-modal interactions where audio context is important.
+音频数据**必须**是 base64 编码的，并包含有效的 MIME 类型。这使得音频上下文重要的多模态交互成为可能。
 
-#### Embedded Resources
+#### 嵌入资源
 
-Embedded resources allow referencing server-side resources directly in messages:
+嵌入资源允许在消息中直接引用服务器端资源：
 
 ```json
 {
@@ -237,36 +222,33 @@ Embedded resources allow referencing server-side resources directly in messages:
   "resource": {
     "uri": "resource://example",
     "mimeType": "text/plain",
-    "text": "Resource content"
+    "text": "资源内容"
   }
 }
 ```
 
-Resources can contain either text or binary (blob) data and **MUST** include:
+资源可以包含文本或二进制（blob）数据，并且**必须**包括：
 
-- A valid resource URI
-- The appropriate MIME type
-- Either text content or base64-encoded blob data
+- 有效的资源 URI
+- 适当的 MIME 类型
+- 文本内容或 base64 编码的 blob 数据
 
-Embedded resources enable prompts to seamlessly incorporate server-managed content like
-documentation, code samples, or other reference materials directly into the conversation
-flow.
+嵌入资源使提示能够无缝地将服务器管理的内容（如文档、代码示例或其他参考材料）直接合并到对话流中。
 
-## Error Handling
+## 错误处理
 
-Servers **SHOULD** return standard JSON-RPC errors for common failure cases:
+服务器**应该**为常见的失败情况返回标准 JSON-RPC 错误：
 
-- Invalid prompt name: `-32602` (Invalid params)
-- Missing required arguments: `-32602` (Invalid params)
-- Internal errors: `-32603` (Internal error)
+- 无效的提示名称：`-32602`（无效参数）
+- 缺少必需参数：`-32602`（无效参数）
+- 内部错误：`-32603`（内部错误）
 
-## Implementation Considerations
+## 实现考虑
 
-1. Servers **SHOULD** validate prompt arguments before processing
-2. Clients **SHOULD** handle pagination for large prompt lists
-3. Both parties **SHOULD** respect capability negotiation
+1. 服务器**应该**在处理前验证提示参数
+2. 客户端**应该**处理大型提示列表的分页
+3. 双方**应该**尊重能力协商
 
-## Security
+## 安全
 
-Implementations **MUST** carefully validate all prompt inputs and outputs to prevent
-injection attacks or unauthorized access to resources.
+实现**必须**仔细验证所有提示输入和输出，以防止注入攻击或未授权访问资源。
